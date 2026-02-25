@@ -5,7 +5,7 @@
 #  Features:
 #  - Choice of Desktop Environment (XFCE, LXQt, MATE, KDE)
 #  - Smart GPU acceleration detection (Turnip/Zink)
-#  - Productivity and Media tools (VS Code, VLC, Firefox)
+#  - Productivity and Media tools (VLC, Firefox)
 #  - Python & Web Dev environment pre-installed
 #  - Windows App Support (Wine/Hangover)
 #######################################################
@@ -76,7 +76,7 @@ spinner() {
 install_pkg() {
     local pkg=$1
     local name=${2:-$pkg}
-    (yes | pkg install $pkg -y > /dev/null 2>&1) &
+    (DEBIAN_FRONTEND=noninteractive apt-get install -y -o Dpkg::Options::="--force-confold" $pkg > /dev/null 2>&1) &
     spinner $! "Installing ${name}..."
 }
 
@@ -153,9 +153,9 @@ step_update() {
     update_progress
     echo -e "${PURPLE}[Step ${CURRENT_STEP}/${TOTAL_STEPS}] Updating system packages...${NC}"
     echo ""
-    (yes | pkg update -y > /dev/null 2>&1) &
+    (DEBIAN_FRONTEND=noninteractive apt-get update -y > /dev/null 2>&1) &
     spinner $! "Updating package lists..."
-    (yes | pkg upgrade -y > /dev/null 2>&1) &
+    (DEBIAN_FRONTEND=noninteractive apt-get upgrade -y -q -o Dpkg::Options::="--force-confold" > /dev/null 2>&1) &
     spinner $! "Upgrading installed packages..."
 }
 
@@ -165,7 +165,7 @@ step_repos() {
     echo -e "${PURPLE}[Step ${CURRENT_STEP}/${TOTAL_STEPS}] Adding package repositories...${NC}"
     echo ""
     install_pkg "x11-repo" "X11 Repository"
-    install_pkg "tur-repo" "TUR Repository (Firefox, VS Code)"
+    install_pkg "tur-repo" "TUR Repository (Firefox)"
 }
 
 # ============== STEP 3: INSTALL TERMUX-X11 ==============
@@ -237,7 +237,6 @@ step_apps() {
     echo -e "${PURPLE}[Step ${CURRENT_STEP}/${TOTAL_STEPS}] Installing Media & Dev Apps...${NC}"
     echo ""
     install_pkg "firefox" "Firefox Browser"
-    install_pkg "code-oss" "VS Code Editor"
     install_pkg "vlc" "VLC Media Player"
     install_pkg "git" "Git Version Control"
     install_pkg "wget" "Wget Downloader"
@@ -430,13 +429,7 @@ Icon=firefox
 Type=Application
 EOF
 
-    cat > ~/Desktop/VSCode.desktop << 'EOF'
-[Desktop Entry]
-Name=VS Code
-Exec=code-oss --no-sandbox
-Icon=code-oss
-Type=Application
-EOF
+
 
     cat > ~/Desktop/VLC.desktop << 'EOF'
 [Desktop Entry]
@@ -470,7 +463,7 @@ Type=Application
 EOF
 
     chmod +x ~/Desktop/*.desktop 2>/dev/null
-    echo -e "  [+] Added Firefox, VS Code, VLC, Wine, and Terminal shortcuts."
+    echo -e "  [+] Added Firefox, VLC, Wine, and Terminal shortcuts."
 }
 
 # ============== COMPLETION ==============
@@ -486,7 +479,7 @@ COMPLETE
     
     echo -e "${WHITE}[*] Your ${DE_NAME} environment is ready.${NC}"
     echo -e "${CYAN}[*] Installed Software:${NC}"
-    echo "    - VS Code & Python (Flask Demo located in ~/demo_python)"
+    echo "    - Python (Flask Demo located in ~/demo_python)"
     echo "    - Firefox Browser & VLC Media Player"
     echo "    - Wine & Hangover (Windows PC App compatibility)"
     echo "    - GPU Hardware Acceleration Enabled"
